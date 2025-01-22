@@ -1,3 +1,6 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
 
 .youtube.com	TRUE	/	FALSE	1727613228	ST-bzxzc6	csn=fuqffeZledorx1Ed&itct=CLcBEPxaIhMIkMaV25ToiAMVJulMAh3LSSaAMgpnLWhpZ2gtcmVjWg9GRXdoYXRfdG9fd2F0Y2iaAQYQjh4YngE%3D
 .youtube.com	TRUE	/	FALSE	1733735728	ST-1k2zqok	csn=9V39knBO0STvBIe6&itct=CHgQh_YEGAAiEwiZy8PsrJqKAxXzOXsHHdqEEaZaD0ZFd2hhdF90b193YXRjaJoBBQgkEI4e
@@ -37,8 +40,6 @@
 .youtube.com	TRUE	/	FALSE	1769099637	SIDCC	AKEyXzUvnOMwyKPSuRVnr6IngsGzHcapnrNzMIIGNCB0LGho--4k9MWzm0J8eSv8LKLfDQ7e
 .youtube.com	TRUE	/	TRUE	1769099637	__Secure-1PSIDCC	AKEyXzUrOspWPyGPV2EJ0o-Jsb3oduwjJ98EK59xdsExxa8eFlAhcBA916i1LJlMNiuCGft9AA
 .youtube.com	TRUE	/	TRUE	1769099637	__Secure-3PSIDCC	AKEyXzVtSfAC7_TBNAkL8YBLT4Nq0G4y5H5H2hnjSwIQinfmsshmNE9OWqRFKIdvYA37PaxNLw
-
-
 .instagram.com	TRUE	/	TRUE	1772123697	mid	Z5EeLgABAAGu28FcVcVhlgShR4gp
 .instagram.com	TRUE	/	TRUE	1772123698	datr	Lh6RZ3K-P0EcvZc6VZvyUftT
 .instagram.com	TRUE	/	TRUE	1769099699	ig_nrcb	1
