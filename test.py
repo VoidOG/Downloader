@@ -6,9 +6,12 @@ import re
 import logging
 from telegram.utils.helpers import mention_html
 import pymongo
+import time
 
 LOGS_GROUP_ID = -1002183841044
 OWNER_ID = 6663845789
+# Store the bot's start time  
+BOT_START_TIME = time.time()  
 
 mongo_url = "mongodb+srv://Cenzo:Cenzo123@cenzo.azbk1.mongodb.net/"
 client = pymongo.MongoClient(mongo_url)
@@ -105,10 +108,30 @@ def start(update: Update, context: CallbackContext) -> None:
     )
 
 
-def stats(update: Update, context: CallbackContext) -> None:
-    user_count = get_users_count()
-    chat_count = get_chats_count()
-    update.message.reply_text(f"𝖳𝗈𝗍𝖺𝗅 𝖴𝗌𝖾𝗋𝗌: {user_count}\n𝖳𝗈𝗍𝖺𝗅 𝖢𝗁𝖺𝗍𝗌: {chat_count}")
+def stats(update: Update, context: CallbackContext) -> None:  
+    if update.message.from_user.id != OWNER_ID:  
+        update.message.reply_text("🚫 *𝖸𝗈𝗎 𝖺𝗋𝖾 𝗇𝗈𝗍 𝖺𝗎𝗍𝗁𝗈𝗋𝗂𝗓𝖾𝖽 𝗍𝗈 𝗎𝗌𝖾 𝗍𝗁𝗂𝗌 𝖼𝗈𝗆𝗆𝖺𝗇𝖽.*", parse_mode=ParseMode.MARKDOWN)  
+        return  
+
+    # Calculate uptime  
+    uptime_seconds = int(time.time() - BOT_START_TIME)  
+    uptime = time.strftime("%H:%M:%S", time.gmtime(uptime_seconds))  
+
+    # Calculate ping  
+    start_time = time.time()  
+    update.message.reply_text("𝖢𝗁𝖾𝖼𝗄𝗂𝗇𝗀 𝗉𝗂𝗇𝗀...", parse_mode=ParseMode.MARKDOWN)  
+    ping = round((time.time() - start_time) * 1000, 2)  # Convert to milliseconds  
+
+    # Get total users and chats  
+    user_count = get_users_count()  
+    chat_count = get_chats_count()  
+
+    update.message.reply_text(f"*𝖡𝗈𝗍 𝖲𝗍𝖺𝗍𝗂𝗌𝗍𝗂𝖼𝗌*\n\n"  
+                              f"*𝖳𝗈𝗍𝖺𝗅 𝖴𝗌𝖾𝗋𝗌:* `{user_count}`\n"  
+                              f"*𝖳𝗈𝗍𝖺𝗅 𝖢𝗁𝖺𝗍𝗌:* `{chat_count}`\n"  
+                              f"*𝖴𝗉𝗍𝗂𝗆𝖾:* `{uptime}`\n"  
+                              f"*𝖯𝗂𝗇𝗀:* `{ping} ms`",  
+                              parse_mode=ParseMode.MARKDOWN)
 
 
 def handle_message(update: Update, context: CallbackContext) -> None:
@@ -153,26 +176,47 @@ def error(update: Update, context: CallbackContext) -> None:
 
 def broadcast(update: Update, context: CallbackContext) -> None:
     if update.message.from_user.id != OWNER_ID:
-        update.message.reply_text("𝖸𝗈𝗎 𝖺𝗋𝖾 𝗇𝗈𝗍 𝖺𝗎𝗍𝗁𝗈𝗋𝗂𝗓𝖾𝖽 𝗍𝗈 𝗎𝗌𝖾 𝗍𝗁𝗂𝗌 𝖼𝗈𝗆𝗆𝖺𝗇𝖽")
-        return
-
-    message = " ".join(context.args)
-    if not message:
-        update.message.reply_text("𝖴𝗌𝖺𝗀𝖾: /broadcast <𝗆𝖾𝗌𝗌𝖺𝗀𝖾>")
+        update.message.reply_text("🚫 *𝖸𝗈𝗎 𝖺𝗋𝖾 𝗇𝗈𝗍 𝖺𝗎𝗍𝗁𝗈𝗋𝗂𝗓𝖾𝖽 𝗍𝗈 𝗎𝗌𝖾 𝗍𝗁𝗂𝗌 𝖼𝗈𝗆𝗆𝖺𝗇𝖽.*", parse_mode=ParseMode.MARKDOWN)
         return
 
     chats_collection = db["chats"]
     chats = chats_collection.find()
 
+    if update.message.reply_to_message:
+        message = update.message.reply_to_message
+        send_function = lambda chat_id: context.bot.forward_message(chat_id, update.message.chat_id, message.message_id)
+    else:
+        message_text = " ".join(context.args)
+        if not message_text:
+            update.message.reply_text("*Usage:* `/broadcast <message>` or reply to a message with `/broadcast`", parse_mode=ParseMode.MARKDOWN)
+            return
+        send_function = lambda chat_id: context.bot.send_message(chat_id, message_text, parse_mode=ParseMode.MARKDOWN)
+
+    total_users, success_count, fail_count, deleted_accounts = 0, 0, 0, 0
+    start_time = time.time()
+
     for chat in chats:
         chat_id = chat['chat_id']
+        total_users += 1
         try:
-            context.bot.send_message(chat_id, message)
+            send_function(chat_id)
+            success_count += 1
         except Exception as e:
-            logger.warning(f"𝖥𝖺𝗂𝗅𝖾𝖽 𝗍𝗈 𝗌𝖾𝗇𝖽 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 {chat_id}: {e}")
+            if "user is deactivated" in str(e) or "deleted" in str(e):
+                deleted_accounts += 1
+            fail_count += 1
 
-    update.message.reply_text("Broadcast message sent")
+    elapsed_time = round(time.time() - start_time, 2)
 
+    update.message.reply_text(
+        f"*𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖲𝗎𝗆𝗆𝖺𝗋𝗒*\n\n"
+        f"*𝖳𝗈𝗍𝖺𝗅 𝖴𝗌𝖾𝗋𝗌:* `{total_users}`\n"
+        f"*𝖲𝗎𝖼𝖼𝖾𝗌𝗌𝖿𝗎𝗅:* `{success_count}`\n"
+        f"*𝖥𝖺𝗂𝗅𝖾𝖽:* `{fail_count}`\n"
+        f"*𝖣𝖾𝗅𝖾𝗍𝖾𝖽 𝖠𝖼𝖼𝗈𝗎𝗇𝗍𝗌:* `{deleted_accounts}`\n"
+        f"*𝖳𝗂𝗆𝖾 𝖳𝖺𝗄𝖾𝗇:* `{elapsed_time} sec`",
+        parse_mode=ParseMode.MARKDOWN
+    )
 
 def main() -> None:
     updater = Updater("7488772903:AAGP-ZvbH7K2XzYG9vv-jIsA12iRxTeya3U", use_context=True)
