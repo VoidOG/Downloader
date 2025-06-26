@@ -9,7 +9,7 @@ from telegram.utils.helpers import mention_html
 import pymongo
 import time
 
-LOGS_GROUP_ID = -1002183841044
+LOGS_GROUP_ID = -1002854086015
 OWNER_ID = 6663845789
 # Store the bot's start time  
 BOT_START_TIME = time.time()  
