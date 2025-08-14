@@ -220,7 +220,7 @@ def broadcast(update: Update, context: CallbackContext) -> None:
     )
 
 def main() -> None:
-    updater = Updater("7488772903:AAGMlaLXvGXMfIW7Riv5FX7ehGT0_MJ-Vac", use_context=True)
+    updater = Updater("7887377098:AAGPD37rvqymDGiv3R2xXXvqL4p70GxnWB8", use_context=True)
 
     dispatcher = updater.dispatcher
 
